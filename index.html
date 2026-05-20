@@ -1,0 +1,456 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #1a1a1a; --ink-muted: #555; --paper: #faf9f6; --cream: #f0ede6;
+    --accent: #c0392b; --border: rgba(0,0,0,0.1); --card-bg: #ffffff; --nav-bg: rgba(250,249,246,0.95);
+  }
+  body, .port-root { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); }
+  .port-root { min-height: 100vh; }
+  nav {
+    position: sticky; top: 0; z-index: 100; background: var(--nav-bg);
+    backdrop-filter: blur(8px); border-bottom: 1px solid var(--border);
+    padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px;
+  }
+  .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--ink); }
+  .nav-links { display: flex; gap: 1.5rem; }
+  .nav-links a { font-size: 0.85rem; color: var(--ink-muted); text-decoration: none; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--accent); }
+  section { padding: 5rem 2rem; max-width: 960px; margin: 0 auto; }
+  .hero { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; padding-top: 5rem; }
+  .hero-text h1 { font-family: 'Playfair Display', serif; font-size: 3.2rem; line-height: 1.1; margin-bottom: 1rem; }
+  .hero-text h1 em { color: var(--accent); font-style: italic; }
+  .hero-text p { font-size: 1rem; color: var(--ink-muted); line-height: 1.7; margin-bottom: 1.5rem; }
+  .hero-image-wrap { position: relative; }
+  .profile-img-container {
+    width: 100%; aspect-ratio: 3/4; border-radius: 4px;
+    background: var(--cream); overflow: hidden; border: 1px solid var(--border);
+    position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .profile-img-container img { width: 100%; height: 100%; object-fit: cover; display: none; }
+  .profile-img-container .upload-hint { text-align: center; color: var(--ink-muted); font-size: 0.85rem; padding: 1rem; }
+  .profile-img-container .upload-hint i { font-size: 2rem; display: block; margin-bottom: 0.5rem; opacity: 0.4; }
+  .img-controls { display: none; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .img-controls.visible { display: flex; }
+  .img-controls button { font-size: 0.75rem; padding: 4px 10px; background: var(--cream); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; color: var(--ink); }
+  .img-controls button:hover { background: var(--accent); color: white; border-color: var(--accent); }
+  .img-scale-row { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: var(--ink-muted); width: 100%; }
+  .img-scale-row input[type=range] { flex: 1; }
+  .accent-line { width: 48px; height: 3px; background: var(--accent); margin-bottom: 1rem; }
+  .section-label { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; font-weight: 500; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 2rem; }
+  .edit-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.8rem; padding: 6px 14px; border: 1px solid var(--border); border-radius: 4px;
+    background: transparent; cursor: pointer; color: var(--ink-muted); transition: all 0.2s; margin-left: 8px;
+  }
+  .edit-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
+  .edit-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .editable-text { outline: none; }
+  .editable-text[contenteditable="true"] { border: 1.5px dashed var(--accent); border-radius: 4px; padding: 4px 8px; background: rgba(192,57,43,0.04); }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px; background: var(--accent); color: white;
+    border: none; padding: 10px 24px; border-radius: 4px; font-size: 0.9rem; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: opacity 0.2s;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+  .about-photo { aspect-ratio: 1/1; border-radius: 4px; overflow: hidden; background: var(--cream); position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
+  .about-photo img { width: 100%; height: 100%; object-fit: cover; display: none; }
+  .about-photo .upload-hint { text-align: center; color: var(--ink-muted); font-size: 0.8rem; }
+  .about-photo .upload-hint i { font-size: 1.5rem; display: block; margin-bottom: 0.5rem; opacity: 0.4; }
+  .skills-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1rem; }
+  .skill-tag { font-size: 0.8rem; padding: 4px 12px; background: var(--cream); border: 1px solid var(--border); border-radius: 20px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .skill-tag .rm { display: none; color: var(--accent); font-weight: bold; }
+  .skill-tag:hover .rm { display: inline; }
+  .add-skill { font-size: 0.8rem; padding: 4px 12px; background: transparent; border: 1px dashed var(--border); border-radius: 20px; cursor: pointer; color: var(--ink-muted); }
+  .add-skill:hover { border-color: var(--accent); color: var(--accent); }
+  .works-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+  .works-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem; }
+  .work-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
+  .work-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
+  .work-thumb { width: 100%; aspect-ratio: 4/3; background: var(--cream); overflow: hidden; position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .work-thumb img { width: 100%; height: 100%; object-fit: cover; display: none; }
+  .work-thumb .thumb-hint { text-align: center; color: var(--ink-muted); font-size: 0.78rem; }
+  .work-thumb .thumb-hint i { font-size: 1.8rem; display: block; margin-bottom: 0.4rem; opacity: 0.35; }
+  .thumb-controls { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; gap: 8px; }
+  .work-thumb:hover .thumb-controls.has-img { display: flex; }
+  .thumb-ctrl-btn { font-size: 0.75rem; padding: 5px 10px; background: white; border: none; border-radius: 4px; cursor: pointer; }
+  .work-info { padding: 1rem; }
+  .work-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; margin-bottom: 0.3rem; }
+  .work-desc { font-size: 0.82rem; color: var(--ink-muted); line-height: 1.5; }
+  .work-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 0.6rem; }
+  .work-tag { font-size: 0.7rem; padding: 2px 8px; background: var(--cream); border-radius: 3px; color: var(--ink-muted); }
+  .work-actions { display: flex; gap: 6px; margin-top: 0.8rem; }
+  .work-actions button { font-size: 0.75rem; padding: 4px 10px; background: transparent; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; color: var(--ink-muted); }
+  .work-actions button:hover { background: var(--accent); color: white; border-color: var(--accent); }
+  .card-del-btn { position: absolute; top: 8px; right: 8px; background: var(--accent); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 0.75rem; cursor: pointer; display: none; align-items: center; justify-content: center; }
+  .work-card:hover .card-del-btn { display: flex; }
+  .contact-box { background: var(--cream); border-radius: 8px; padding: 3rem; text-align: center; border: 1px solid var(--border); }
+  .contact-box h2 { font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 1rem; }
+  .contact-box p { color: var(--ink-muted); margin-bottom: 1.5rem; }
+  .contact-links { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .contact-link { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: white; border: 1px solid var(--border); border-radius: 4px; text-decoration: none; color: var(--ink); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+  .contact-link:hover { background: var(--accent); color: white; border-color: var(--accent); }
+  footer { border-top: 1px solid var(--border); padding: 1.5rem 2rem; text-align: center; font-size: 0.8rem; color: var(--ink-muted); }
+  .hidden-input { display: none; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: white; border-radius: 8px; padding: 2rem; width: 420px; max-width: 90vw; }
+  .modal h3 { font-family: 'Playfair Display', serif; margin-bottom: 1rem; }
+  .modal input, .modal textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.75rem; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; }
+  .modal textarea { height: 80px; resize: vertical; }
+  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
+  .modal-btns button { padding: 8px 18px; border-radius: 4px; border: 1px solid var(--border); cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .modal-btns .modal-save { background: var(--accent); color: white; border-color: var(--accent); }
+  @media (max-width: 640px) { .hero, .about-grid { grid-template-columns: 1fr; } .hero-text h1 { font-size: 2.2rem; } }
+</style>
+
+<div class="port-root">
+  <nav>
+    <div class="nav-logo" id="navName" contenteditable="false">Arcena</div>
+    <div class="nav-links">
+      <a onclick="scrollTo('about')">About</a>
+      <a onclick="scrollTo('works')">Works</a>
+      <a onclick="scrollTo('contact')">Contact</a>
+    </div>
+  </nav>
+
+  <section class="hero" style="max-width:960px;margin:0 auto;padding:4rem 2rem 2rem;">
+    <div class="hero-text">
+      <div class="accent-line"></div>
+      <h1>
+        <span class="editable-text" id="heroTitle" contenteditable="false">Creative</span><br>
+        <em class="editable-text" id="heroSubtitle" contenteditable="false">Portfolio.</em>
+      </h1>
+      <p class="editable-text" id="heroTagline" contenteditable="false">I create animations, illustrations, and visual stories that bring ideas to life.</p>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="btn-primary" onclick="scrollTo('works')"><i class="ti ti-eye" aria-hidden="true"></i> View My Work</button>
+        <button class="edit-btn" id="heroEditBtn" onclick="toggleHeroEdit()"><i class="ti ti-edit" aria-hidden="true"></i> Edit</button>
+      </div>
+    </div>
+    <div class="hero-image-wrap">
+      <div class="profile-img-container" onclick="triggerUpload('profileImg')" id="profileImgBox">
+        <img id="profileImgEl" alt="Profile photo">
+        <div class="upload-hint"><i class="ti ti-user-circle" aria-hidden="true"></i>Click to upload your profile photo</div>
+      </div>
+      <div class="img-controls" id="profileControls">
+        <div class="img-scale-row">
+          <i class="ti ti-zoom-out" aria-hidden="true" style="font-size:14px"></i>
+          <input type="range" min="80" max="200" value="100" step="1" oninput="scaleImg('profileImgEl',this.value)" title="Zoom">
+          <i class="ti ti-zoom-in" aria-hidden="true" style="font-size:14px"></i>
+        </div>
+        <button onclick="triggerUpload('profileImg')"><i class="ti ti-refresh" aria-hidden="true"></i> Change</button>
+        <button onclick="removeImg('profileImgEl','profileImgBox','profileControls')"><i class="ti ti-trash" aria-hidden="true"></i> Remove</button>
+      </div>
+      <input class="hidden-input" type="file" id="profileImg" accept="image/*" onchange="loadImg(this,'profileImgEl','profileImgBox','profileControls')">
+    </div>
+  </section>
+
+  <section id="about" style="max-width:960px;margin:0 auto;padding:4rem 2rem;">
+    <div class="about-grid">
+      <div>
+        <div class="about-photo" onclick="triggerUpload('aboutImg')" id="aboutImgBox">
+          <img id="aboutImgEl" alt="About photo">
+          <div class="upload-hint"><i class="ti ti-camera" aria-hidden="true"></i>Upload another photo</div>
+        </div>
+        <div class="img-controls" id="aboutControls" style="margin-top:8px;">
+          <div class="img-scale-row">
+            <i class="ti ti-zoom-out" aria-hidden="true" style="font-size:14px"></i>
+            <input type="range" min="80" max="200" value="100" step="1" oninput="scaleImg('aboutImgEl',this.value)" title="Zoom">
+            <i class="ti ti-zoom-in" aria-hidden="true" style="font-size:14px"></i>
+          </div>
+          <button onclick="triggerUpload('aboutImg')"><i class="ti ti-refresh" aria-hidden="true"></i> Change</button>
+          <button onclick="removeImg('aboutImgEl','aboutImgBox','aboutControls')"><i class="ti ti-trash" aria-hidden="true"></i> Remove</button>
+        </div>
+        <input class="hidden-input" type="file" id="aboutImg" accept="image/*" onchange="loadImg(this,'aboutImgEl','aboutImgBox','aboutControls')">
+      </div>
+      <div>
+        <p class="section-label">About Me</p>
+        <h2 class="section-title editable-text" id="aboutName" contenteditable="false">Arcena</h2>
+        <p class="editable-text" id="aboutBio" contenteditable="false" style="color:var(--ink-muted);line-height:1.8;margin-bottom:1.5rem;">I'm a creative artist passionate about animation, illustration, and visual storytelling. My work spans character design, motion graphics, and digital art. I love bringing characters and ideas to life through expressive visuals.</p>
+        <button class="edit-btn" onclick="toggleAboutEdit()"><i class="ti ti-edit" aria-hidden="true"></i> Edit Bio</button>
+        <div style="margin-top:1.5rem;">
+          <p style="font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:0.5rem;">Skills</p>
+          <div class="skills-list" id="skillsList">
+            <span class="skill-tag" onclick="removeSkill(this)">Animation <span class="rm">×</span></span>
+            <span class="skill-tag" onclick="removeSkill(this)">Illustration <span class="rm">×</span></span>
+            <span class="skill-tag" onclick="removeSkill(this)">Character Design <span class="rm">×</span></span>
+            <span class="skill-tag" onclick="removeSkill(this)">Motion Graphics <span class="rm">×</span></span>
+            <span class="skill-tag" onclick="removeSkill(this)">Digital Art <span class="rm">×</span></span>
+          </div>
+          <button class="add-skill" style="margin-top:6px;" onclick="addSkill()"><i class="ti ti-plus" aria-hidden="true"></i> Add Skill</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="works" style="max-width:960px;margin:0 auto;padding:4rem 2rem;">
+    <div class="works-header">
+      <div>
+        <p class="section-label">Portfolio</p>
+        <h2 class="section-title" style="margin-bottom:0;">My Works</h2>
+      </div>
+      <button class="btn-primary" onclick="openAddModal()"><i class="ti ti-plus" aria-hidden="true"></i> Add Project</button>
+    </div>
+    <div class="works-grid" id="worksGrid">
+
+      <div class="work-card">
+        <button class="card-del-btn" onclick="deleteCard(this)" title="Remove"><i class="ti ti-x" aria-hidden="true"></i></button>
+        <div class="work-thumb" id="thumb0" onclick="triggerWorkUpload(0)">
+          <img id="workImg0" alt="Cartoon Monkey">
+          <div class="thumb-hint"><i class="ti ti-photo" aria-hidden="true"></i>Click to add image</div>
+          <div class="thumb-controls" id="thumbCtrl0">
+            <button class="thumb-ctrl-btn" onclick="event.stopPropagation();triggerWorkUpload(0)">Change</button>
+            <button class="thumb-ctrl-btn" onclick="event.stopPropagation();removeWorkImg(0)">Remove</button>
+          </div>
+        </div>
+        <div class="work-info">
+          <div class="work-title editable-text" contenteditable="false" id="wtitle0">Cartoon Monkey Character</div>
+          <div class="work-desc editable-text" contenteditable="false" id="wdesc0">A grumpy monkey character design with expressive face and dynamic pose. Digital illustration.</div>
+          <div class="work-tags"><span class="work-tag">Illustration</span><span class="work-tag">Character Design</span></div>
+          <div class="work-actions"><button onclick="editWorkCard(0)"><i class="ti ti-edit" aria-hidden="true"></i> Edit</button></div>
+        </div>
+        <input class="hidden-input" type="file" id="wfile0" accept="image/*" onchange="loadWorkImg(this,0)">
+      </div>
+
+      <div class="work-card">
+        <button class="card-del-btn" onclick="deleteCard(this)" title="Remove"><i class="ti ti-x" aria-hidden="true"></i></button>
+        <div class="work-thumb" id="thumb1" onclick="triggerWorkUpload(1)">
+          <img id="workImg1" alt="Currency Wars">
+          <div class="thumb-hint"><i class="ti ti-photo" aria-hidden="true"></i>Click to add image</div>
+          <div class="thumb-controls" id="thumbCtrl1">
+            <button class="thumb-ctrl-btn" onclick="event.stopPropagation();triggerWorkUpload(1)">Change</button>
+            <button class="thumb-ctrl-btn" onclick="event.stopPropagation();removeWorkImg(1)">Remove</button>
+          </div>
+        </div>
+        <div class="work-info">
+          <div class="work-title editable-text" contenteditable="false" id="wtitle1">Currency Wars</div>
+          <div class="work-desc editable-text" contenteditable="false" id="wdesc1">Graphic design for a presentation slide exploring global currency conflicts between major economies.</div>
+          <div class="work-tags"><span class="work-tag">Graphic Design</span><span class="work-tag">Presentation</span></div>
+          <div class="work-actions"><button onclick="editWorkCard(1)"><i class="ti ti-edit" aria-hidden="true"></i> Edit</button></div>
+        </div>
+        <input class="hidden-input" type="file" id="wfile1" accept="image/*" onchange="loadWorkImg(this,1)">
+      </div>
+
+      <div class="work-card">
+        <button class="card-del-btn" onclick="deleteCard(this)" title="Remove"><i class="ti ti-x" aria-hidden="true"></i></button>
+        <div class="work-thumb" id="thumb2" onclick="triggerWorkUpload(2)">
+          <img id="workImg2" alt="Crab Creature">
+          <div class="thumb-hint"><i class="ti ti-photo" aria-hidden="true"></i>Click to add image</div>
+          <div class="thumb-controls" id="thumbCtrl2">
+            <button class="thumb-ctrl-btn" onclick="event.stopPropagation();triggerWorkUpload(2)">Change</button>
+            <button class="thumb-ctrl-btn" onclick="event.stopPropagation();removeWorkImg(2)">Remove</button>
+          </div>
+        </div>
+        <div class="work-info">
+          <div class="work-title editable-text" contenteditable="false" id="wtitle2">Crab Creature</div>
+          <div class="work-desc editable-text" contenteditable="false" id="wdesc2">A menacing crab-like creature with an angular body and sprawling dark legs. Original creature design.</div>
+          <div class="work-tags"><span class="work-tag">Creature Design</span><span class="work-tag">Digital Art</span></div>
+          <div class="work-actions"><button onclick="editWorkCard(2)"><i class="ti ti-edit" aria-hidden="true"></i> Edit</button></div>
+        </div>
+        <input class="hidden-input" type="file" id="wfile2" accept="image/*" onchange="loadWorkImg(this,2)">
+      </div>
+
+      <div class="work-card">
+        <button class="card-del-btn" onclick="deleteCard(this)" title="Remove"><i class="ti ti-x" aria-hidden="true"></i></button>
+        <div class="work-thumb" id="thumb3" onclick="triggerWorkUpload(3)">
+          <img id="workImg3" alt="Stickman Animation">
+          <div class="thumb-hint"><i class="ti ti-photo" aria-hidden="true"></i>Click to add image</div>
+          <div class="thumb-controls" id="thumbCtrl3">
+            <button class="thumb-ctrl-btn" onclick="event.stopPropagation();triggerWorkUpload(3)">Change</button>
+            <button class="thumb-ctrl-btn" onclick="event.stopPropagation();removeWorkImg(3)">Remove</button>
+          </div>
+        </div>
+        <div class="work-info">
+          <div class="work-title editable-text" contenteditable="false" id="wtitle3">Stickman Animation</div>
+          <div class="work-desc editable-text" contenteditable="false" id="wdesc3">A frame from a stickman animation scene with a key collectible element. 2D animation work.</div>
+          <div class="work-tags"><span class="work-tag">Animation</span><span class="work-tag">2D</span></div>
+          <div class="work-actions"><button onclick="editWorkCard(3)"><i class="ti ti-edit" aria-hidden="true"></i> Edit</button></div>
+        </div>
+        <input class="hidden-input" type="file" id="wfile3" accept="image/*" onchange="loadWorkImg(this,3)">
+      </div>
+
+    </div>
+  </section>
+
+  <section id="contact" style="max-width:960px;margin:0 auto;padding:2rem 2rem 4rem;">
+    <div class="contact-box">
+      <h2 class="editable-text" id="contactTitle" contenteditable="false">Let's Work Together</h2>
+      <p class="editable-text" id="contactSub" contenteditable="false" style="color:var(--ink-muted);">Have a project in mind? I'd love to hear from you.</p>
+      <div class="contact-links">
+        <span class="contact-link editable-text" id="contactEmail" contenteditable="false"><i class="ti ti-mail" aria-hidden="true"></i> your@email.com</span>
+        <span class="contact-link editable-text" id="contactSocial" contenteditable="false"><i class="ti ti-brand-instagram" aria-hidden="true"></i> @yourhandle</span>
+      </div>
+      <div style="margin-top:1rem;">
+        <button class="edit-btn" onclick="toggleContactEdit()"><i class="ti ti-edit" aria-hidden="true"></i> Edit Contact</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© <span id="yr"></span> Arcena. All rights reserved.</p>
+  </footer>
+</div>
+
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <h3>Add New Project</h3>
+    <input type="text" id="newTitle" placeholder="Project title">
+    <textarea id="newDesc" placeholder="Short description..."></textarea>
+    <input type="text" id="newTags" placeholder="Tags (comma-separated): e.g. Animation, Design">
+    <div class="modal-btns">
+      <button onclick="closeModal()">Cancel</button>
+      <button class="modal-save" onclick="saveNewCard()">Add Project</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h3>Edit Project</h3>
+    <input type="text" id="editTitle" placeholder="Project title">
+    <textarea id="editDesc" placeholder="Short description..."></textarea>
+    <input type="text" id="editTags" placeholder="Tags (comma-separated)">
+    <div class="modal-btns">
+      <button onclick="closeEditModal()">Cancel</button>
+      <button class="modal-save" onclick="saveEditCard()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+  function scrollTo(id) { document.getElementById(id).scrollIntoView({behavior:'smooth'}); }
+  function triggerUpload(id) { document.getElementById(id).click(); }
+  function loadImg(input, imgId, boxId, ctrlId) {
+    const file = input.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.getElementById(imgId);
+      img.src = e.target.result; img.style.display = 'block';
+      document.getElementById(boxId).querySelector('.upload-hint').style.display = 'none';
+      document.getElementById(ctrlId).classList.add('visible');
+    };
+    reader.readAsDataURL(file);
+  }
+  function scaleImg(imgId, val) {
+    const img = document.getElementById(imgId);
+    img.style.transform = `scale(${val/100})`;
+    img.style.transformOrigin = 'center center';
+  }
+  function removeImg(imgId, boxId, ctrlId) {
+    const img = document.getElementById(imgId);
+    img.src=''; img.style.display='none';
+    document.getElementById(boxId).querySelector('.upload-hint').style.display='';
+    document.getElementById(ctrlId).classList.remove('visible');
+  }
+  let workCounter = 4;
+  function triggerWorkUpload(idx) { document.getElementById('wfile'+idx).click(); }
+  function loadWorkImg(input, idx) {
+    const file = input.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.getElementById('workImg'+idx);
+      img.src = e.target.result; img.style.display = 'block';
+      document.getElementById('thumb'+idx).querySelector('.thumb-hint').style.display = 'none';
+      document.getElementById('thumbCtrl'+idx).classList.add('has-img');
+    };
+    reader.readAsDataURL(file);
+  }
+  function removeWorkImg(idx) {
+    const img = document.getElementById('workImg'+idx);
+    img.src=''; img.style.display='none';
+    document.getElementById('thumb'+idx).querySelector('.thumb-hint').style.display='';
+    document.getElementById('thumbCtrl'+idx).classList.remove('has-img');
+  }
+  function deleteCard(btn) { btn.closest('.work-card').remove(); }
+  function openAddModal() {
+    document.getElementById('newTitle').value='';
+    document.getElementById('newDesc').value='';
+    document.getElementById('newTags').value='';
+    document.getElementById('addModal').classList.add('open');
+  }
+  function closeModal() { document.getElementById('addModal').classList.remove('open'); }
+  let currentEditIdx = null;
+  function editWorkCard(idx) {
+    currentEditIdx = idx;
+    document.getElementById('editTitle').value = document.getElementById('wtitle'+idx).textContent;
+    document.getElementById('editDesc').value = document.getElementById('wdesc'+idx).textContent;
+    document.getElementById('editModal').classList.add('open');
+  }
+  function closeEditModal() { document.getElementById('editModal').classList.remove('open'); }
+  function saveEditCard() {
+    const i = currentEditIdx;
+    document.getElementById('wtitle'+i).textContent = document.getElementById('editTitle').value;
+    document.getElementById('wdesc'+i).textContent = document.getElementById('editDesc').value;
+    closeEditModal();
+  }
+  function saveNewCard() {
+    const title = document.getElementById('newTitle').value || 'New Project';
+    const desc = document.getElementById('newDesc').value || 'Add a description...';
+    const tagsRaw = document.getElementById('newTags').value;
+    const idx = workCounter++;
+    const tags = tagsRaw ? tagsRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
+    const tagsHtml = tags.map(t=>`<span class="work-tag">${t}</span>`).join('');
+    const card = document.createElement('div');
+    card.className = 'work-card';
+    card.innerHTML = `
+      <button class="card-del-btn" onclick="deleteCard(this)" title="Remove"><i class="ti ti-x" aria-hidden="true"></i></button>
+      <div class="work-thumb" id="thumb${idx}" onclick="triggerWorkUpload(${idx})">
+        <img id="workImg${idx}" alt="${title}">
+        <div class="thumb-hint"><i class="ti ti-photo" aria-hidden="true"></i>Click to add image</div>
+        <div class="thumb-controls" id="thumbCtrl${idx}">
+          <button class="thumb-ctrl-btn" onclick="event.stopPropagation();triggerWorkUpload(${idx})">Change</button>
+          <button class="thumb-ctrl-btn" onclick="event.stopPropagation();removeWorkImg(${idx})">Remove</button>
+        </div>
+      </div>
+      <div class="work-info">
+        <div class="work-title editable-text" contenteditable="false" id="wtitle${idx}">${title}</div>
+        <div class="work-desc editable-text" contenteditable="false" id="wdesc${idx}">${desc}</div>
+        <div class="work-tags">${tagsHtml}</div>
+        <div class="work-actions">
+          <button onclick="editWorkCard(${idx})"><i class="ti ti-edit" aria-hidden="true"></i> Edit</button>
+        </div>
+      </div>
+      <input class="hidden-input" type="file" id="wfile${idx}" accept="image/*" onchange="loadWorkImg(this,${idx})">
+    `;
+    document.getElementById('worksGrid').appendChild(card);
+    closeModal();
+  }
+  function toggleHeroEdit() {
+    const els = ['heroTitle','heroSubtitle','heroTagline','navName'];
+    const btn = document.getElementById('heroEditBtn');
+    const on = btn.classList.toggle('active');
+    els.forEach(id => { const el = document.getElementById(id); el.contentEditable = on ? 'true' : 'false'; if(on) el.focus(); });
+    btn.innerHTML = on ? '<i class="ti ti-check" aria-hidden="true"></i> Done' : '<i class="ti ti-edit" aria-hidden="true"></i> Edit';
+  }
+  function toggleAboutEdit() {
+    ['aboutName','aboutBio'].forEach(id => {
+      const el = document.getElementById(id);
+      const wasOn = el.contentEditable === 'true';
+      el.contentEditable = wasOn ? 'false' : 'true';
+      if(!wasOn) el.focus();
+    });
+  }
+  function toggleContactEdit() {
+    ['contactTitle','contactSub','contactEmail','contactSocial'].forEach(id => {
+      const el = document.getElementById(id);
+      el.contentEditable = el.contentEditable === 'true' ? 'false' : 'true';
+    });
+  }
+  function removeSkill(el) { el.remove(); }
+  function addSkill() {
+    const name = prompt('Enter skill name:');
+    if(!name || !name.trim()) return;
+    const tag = document.createElement('span');
+    tag.className = 'skill-tag';
+    tag.innerHTML = name.trim() + ' <span class="rm">×</span>';
+    tag.onclick = function(){ removeSkill(tag); };
+    document.getElementById('skillsList').appendChild(tag);
+  }
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
+  });
+</script>
